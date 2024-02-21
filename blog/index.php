@@ -1,61 +1,26 @@
-<?php
+ <?php
 
-try {
-    $bdd = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root84$');
-    echo "Connexion à la base de données réussie.";
-} catch (PDOException $e) {
-    echo "Erreur de connexion à la base de données : " . $e->getMessage();
-}
-
-require_once('src/controllers/comment/add.php');
-require_once('src/controllers/comment/update.php');
-require_once('src/controllers/homepage.php');
-require_once('src/controllers/post.php');
-
-use Application\Controllers\Comment\Add\AddComment;
-use Application\Controllers\Comment\Update\UpdateComment;
-use Application\Controllers\Homepage\Homepage;
-use Application\Controllers\Post\Post;
-
-try {
-    if (isset($_GET['action']) && $_GET['action'] !== '') {
-        if ($_GET['action'] === 'post') {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                $identifier = $_GET['id'];
-
-                (new Post())->execute($identifier);
-            } else {
-                throw new Exception('Aucun identifiant de billet envoyé');
-            }
-        } elseif ($_GET['action'] === 'addComment') {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                $identifier = $_GET['id'];
-
-                (new AddComment())->execute($identifier, $_POST);
-            } else {
-                throw new Exception('Aucun identifiant de billet envoyé');
-            }
-        } elseif ($_GET['action'] === 'updateComment') {
-            if (isset($_GET['id']) && $_GET['id'] > 0) {
-                $identifier = $_GET['id'];
-                // It sets the input only when the HTTP method is POST (ie. the form is submitted).
-                $input = null;
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    $input = $_POST;
-                }
-
-                (new UpdateComment())->execute($identifier, $input);
-            } else {
-                throw new Exception('Aucun identifiant de commentaire envoyé');
-            }
-        } else {
-            throw new Exception("La page que vous recherchez n'existe pas.");
-        }
-    } else {
-        (new Homepage())->execute();
+    // We connect to the database.
+    try {
+        $database = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root84$');
+    } catch(Exception $e) {
+        die('Erreur : '.$e->getMessage());
     }
-} catch (Exception $e) {
-    $errorMessage = $e->getMessage();
-
-    require('templates/error.php');
-}
+    
+    // We retrieve the 5 last blog posts.
+    $statement = $database->query(
+        "SELECT id, titre, contenu, DATE_FORMAT(date_creation, '%d/%m/%Y à %Hh%imin%ss') AS date_creation_fr FROM billets ORDER BY date_creation DESC LIMIT 0, 5"
+    );
+    $posts = [];
+    while (($row = $statement->fetch())) {
+        $post = [
+            'title' => $row['titre'],
+            'french_creation_date' => $row['date_creation_fr'],
+            'content' => $row['contenu'],
+        ];
+    
+        $posts[] = $post;
+    }
+    
+    require('templates/homepage.php');
+    ?>    
