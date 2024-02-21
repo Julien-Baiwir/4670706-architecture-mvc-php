@@ -1,6 +1,7 @@
  <?php
 
-    // We connect to the database.
+    
+// We connect to the database.
     try {
         $database = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root84$');
     } catch(Exception $e) {
