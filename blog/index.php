@@ -1,7 +1,7 @@
 <?php
 
 try {
-    $bdd = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root84$');
+    $bdd = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', '', '');
     echo "Connexion à la base de données réussie.";
 } catch (PDOException $e) {
     echo "Erreur de connexion à la base de données : " . $e->getMessage();
